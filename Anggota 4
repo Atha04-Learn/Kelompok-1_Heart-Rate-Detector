@@ -1,0 +1,45 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include "MAX30105.h"
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+
+extern Adafruit_SSD1306 display;
+extern int bpm;
+extern int SpO2;
+extern bool buzzer_aktif;
+
+void setup() {
+  // Inisialisasi serial komunikasi
+  Serial.begin(115200);
+}
+
+void loop() {
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  
+  if (bpm > 0 && SpO2 > 0) {
+    display.print(F("Heart Rate: "));
+    display.print(bpm);
+    display.println(F(" BPM"));
+    display.print(F("SpO2: "));
+    display.print(SpO2);
+    display.println(F(" %"));
+    
+    if (buzzer_aktif) {
+      digitalWrite(2, HIGH); // Nyalakan buzzer
+      display.println(F("Status: Abnormal"));
+    } else {
+      digitalWrite(2, LOW); // Matikan buzzer
+      display.println(F("Status: Normal"));
+    }
+  } else {
+    display.println(F("Reading data..."));
+  }
+  
+  display.display();
+  delay(1000); // Tunggu 1 detik sebelum pembacaan berikutnya
+}
