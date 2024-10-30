@@ -1,0 +1,21 @@
+#include "MAX30105.h"
+
+extern MAX30105 particleSensor;
+long irValue, redValue;
+
+void setup() {
+  // Inisialisasi serial komunikasi
+  Serial.begin(115200);
+}
+
+void loop() {
+  irValue = particleSensor.getIR();
+  redValue = particleSensor.getRed();
+
+  if (irValue > 50000) {
+    Serial.println(F("Data Valid"));
+  } else {
+    Serial.println(F("Place finger on sensor"));
+  }
+  delay(1000); // Tunggu 1 detik sebelum pembacaan berikutnya
+}
