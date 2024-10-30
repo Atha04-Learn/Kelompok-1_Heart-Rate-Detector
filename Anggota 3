@@ -1,0 +1,44 @@
+#include "MAX30105.h"
+#include "heartRate.h"
+#include "spo2_algorithm.h"
+
+extern long irValue, redValue;
+float beatsPerMinute;
+int bpm;
+int SpO2;
+int8_t validSPO2;
+int8_t validHeartRate;
+long lastBeat = 0;
+extern bool buzzer_aktif;
+
+void setup() {
+  // Inisialisasi serial komunikasi
+  Serial.begin(115200);
+}
+
+void loop() {
+  if (checkForBeat(irValue) == true) {
+    long delta = millis() - lastBeat;
+    lastBeat = millis();
+    beatsPerMinute = 60 / (delta / 1000.0);
+    if (beatsPerMinute < 255 && beatsPerMinute > 20) {
+      bpm = beatsPerMinute;
+    }
+  }
+
+  int32_t irBuffer[100];
+  int32_t redBuffer[100];
+  for (int i = 0; i < 100; i++) {
+    irBuffer[i] = particleSensor.getIR();
+    redBuffer[i] = particleSensor.getRed();
+  }
+  maxim_heart_rate_and_oxygen_saturation(irBuffer, 100, redBuffer, &SpO2, &validSPO2, &bpm, &validHeartRate);
+
+  if (bpm > 100) { // Ambang batas BPM
+    buzzer_aktif = true;
+  } else {
+    buzzer_aktif = false;
+  }
+
+  delay(1000); // Tunggu 1 detik sebelum pembacaan berikutnya
+}
